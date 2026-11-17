@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#111111">
+  <!-- Wersja strony – musi zgadzać się z VIEWER_VERSION w viewer.js i z ?v= w tagu skryptu na dole. -->
+  <meta name="histary-viewer" content="2">
   <title>histARy – AR</title>
   <link rel="icon" href="data:,">
   <style>
@@ -112,21 +114,42 @@
       flex: 1; background: rgba(28,28,30,.82); border-radius: 12px; pointer-events: none;
       padding: 10px 12px; font-size: 14px; line-height: 1.35; text-align: left;
     }
-    .ar-btn {
-      pointer-events: auto; border: none; border-radius: 50%;
-      width: 48px; height: 48px; flex: 0 0 48px;
-      background: rgba(28,28,30,.82); color: #fff; font-size: 20px; font-weight: bold;
-      display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    /* Przyciski nakładki AR: przytrzymanie palcem nigdy nie zaznacza tekstu, nie powiększa
+       strony i nie otwiera menu kontekstowego (Chrome na Androidzie). */
+    .ar-btn, .ar-mode {
+      pointer-events: auto; border: none; cursor: pointer;
+      user-select: none; -webkit-user-select: none;
+      -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
+    .ar-btn {
+      border-radius: 50%; width: 52px; height: 52px; flex: 0 0 52px;
+      background: rgba(28,28,30,.82); color: #fff; font-size: 22px; font-weight: bold; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: transform .12s ease, background-color .12s ease;
+    }
+    .ar-btn:active, .ar-btn.is-held { transform: scale(.92); background: rgba(112,66,20,.92); }
     .ar-btn:disabled { opacity: .35; }
+
+    /* Dolny pasek (przyciski tworzy viewer.js): lewa grupa – obrót (↺ ↻),
+       środek – tryb „Makieta” / „Skala 1:1”, prawa grupa – skala (− +). */
     .ar-toolbar {
-      position: absolute; left: 0; right: 0; bottom: max(24px, env(safe-area-inset-bottom));
-      display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+      position: absolute; left: 0; right: 0;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      padding: 0 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
     .ar-toolbar[hidden] { display: none; }
+    .ar-group { display: flex; gap: 10px; }
     .ar-mode {
-      pointer-events: auto; border: none; border-radius: 24px; height: 48px; padding: 0 18px;
+      flex: 0 1 auto; min-width: 0; height: 52px; padding: 0 16px; border-radius: 26px;
       background: #704214; color: #fff; font: inherit; font-size: 14px; font-weight: bold;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    @media (max-width: 360px) {
+      .ar-btn { width: 46px; height: 46px; flex-basis: 46px; font-size: 20px; }
+      .ar-group { gap: 6px; }
+      .ar-mode { padding: 0 10px; font-size: 13px; }
     }
     #debug {
       position: absolute; left: 16px; bottom: 90px; font: 11px/1.4 ui-monospace, monospace;
@@ -171,13 +194,8 @@
       <div id="ar-hint"></div>
       <button id="ar-close" class="ar-btn" type="button">✕</button>
     </div>
-    <div id="ar-toolbar" class="ar-toolbar" hidden>
-      <button class="ar-btn" type="button" data-action="rotate-left">⟲</button>
-      <button class="ar-btn" type="button" data-action="smaller">−</button>
-      <button id="ar-mode" class="ar-mode" type="button" data-action="mode"></button>
-      <button class="ar-btn" type="button" data-action="bigger">+</button>
-      <button class="ar-btn" type="button" data-action="rotate-right">⟳</button>
-    </div>
+    <!-- Dolny pasek AR – przyciski (↺ ↻ | tryb | − +) tworzy viewer.js. -->
+    <div id="ar-toolbar" class="ar-toolbar" hidden></div>
     <div id="debug" hidden></div>
   </div>
 
@@ -193,6 +211,7 @@
       }
     }
   </script>
-  <script type="module" src="viewer.js"></script>
+  <!-- Jedyny skrypt aplikacji. ?v=2 wymusza pobranie nowej wersji zamiast kopii z pamięci podręcznej. -->
+  <script type="module" src="./viewer.js?v=2"></script>
 </body>
 </html>
